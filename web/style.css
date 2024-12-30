@@ -5,6 +5,10 @@ body {
     padding: 0;
     background-color: #f9f9f9;
     color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .header {
@@ -14,6 +18,24 @@ body {
     padding: 20px;
     background-color: #fff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box; /* 讓 padding 不影響寬度 */
+}
+
+.header-whole{
+    display: flex;
+    justify-content: space-between; /* 使內容兩側對齊 */
+    max-width: 80%; /* 設定內容最大寬度 */
+    margin: 0 auto; /* 水平置中 */
+    width: 100%; /* 使容器寬度為 100% */
+    box-sizing: border-box; /* 確保 padding 不影響總寬度 */
+}
+
+/* header 左邊區塊 */
+.header-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .header h1 {
@@ -23,7 +45,10 @@ body {
 
 .tags {
     display: flex;
+    justify-content: center; /* 讓標籤水平居中 */
+    flex-wrap: wrap; /* 當標籤過長時換行 */
     gap: 10px;
+    margin-top: 10px; /* 標籤與標題之間的間距 */
 }
 
 .tag {
@@ -76,6 +101,11 @@ body {
 
 .content {
     padding: 20px;
+    max-width: 80%; /* 設定內容最大寬度 */
+    margin: 0 auto; /* 水平置中 */
+    text-align: left; /* 確保內容格式保持左對齊 */
+    box-sizing: border-box; /* 確保 padding 不影響總寬度 */
+    width: 100%;
 }
 
 .day {
@@ -95,12 +125,13 @@ body {
 
 .column {
     flex: 1;
+    max-width: 25%;
     text-align: center;
 }
 
 .column-title {
-    background-color: #ffdab3;
-    color: #ff6600;
+    background-color: #ff9a3d;
+    color: #fff;
     padding: 10px;
     border-radius: 8px;
     font-weight: bold;
@@ -227,7 +258,7 @@ body {
     border: none;
     border-radius: 50%;
     padding: 15px;
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
 }
 
