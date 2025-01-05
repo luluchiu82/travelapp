@@ -58,3 +58,13 @@ buttons.forEach(button => {
         window.location.href = "package.html";
     });
 });
+
+
+// 進入編輯頁面
+document.querySelector('.edit-button').addEventListener('click', () => {
+    window.location.href = `/edit_package`;
+});
+
+
+
+
