@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搜尋結果</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         body {
             display: flex;
@@ -15,45 +16,49 @@
         }
     </style>
 </head>
+
 <body>
     <!-- 右上角的小搜尋欄 -->
-    <div class="search-container-small">
-        <div class="buttons">
-            <button class="button">Search</button>
+    <form action="/search" method="post">
+        <div class="search-container-small">
+            <input type="search" class="search-box" placeholder="繼續搜尋..." name="query">
+            <div class="buttons">
+                <button class="button">Search</button>
+            </div>
         </div>
-        <input type="text" class="search-box" placeholder="繼續搜尋...">
-    </div>
-    
+    </form>
+
+
     <div class="container">
         <!-- Header -->
         <div class="topic">
             <!-- 左箭頭按鈕 -->
             <button class="arrow-button" id="left-arrow" disabled>
-                <img src="left-arrow.png" alt="Left Arrow" class="arrow">
+                <img src="{{ url_for('static', filename='image/left-arrow.png') }}" alt="Left Arrow" class="arrow">
             </button>
-            
+
             <!-- 文字內容 -->
             <div class="text-content">
                 <h1>
-                    <span class="search_place">日本</span>
+                    <span class="search_place">{{ place }}</span>
                     <span class="search_days" id="search-days">三日遊</span>
                 </h1>
-                <p>大家在日本的機票花費：$15,000</p>
+                <p>大家在{{ place }}的機票花費：$15,000</p>
             </div>
-            
+
             <!-- 右箭頭按鈕 -->
             <button class="arrow-button" id="right-arrow">
-                <img src="right-arrow.png" alt="Right Arrow" class="arrow">
+                <img src="{{ url_for('static', filename='image/right-arrow.png') }}" alt="Right Arrow" class="arrow">
             </button>
         </div>
-            
+
         <!-- Options -->
         <div class="options">
             <!-- Low Price -->
             <div class="option-card">
                 <div class="option-header low-price">低價位</div>
                 <div class="option-content">
-                    <img src="low-price.png" alt="低價位" class="option-image">
+                    <img src="{{ url_for('static', filename='image/low-price.png') }}" alt="低價位" class="option-image">
                     <p>經濟型住宿 | 當地小吃</p>
                     <button class="detail-button">查看詳細行程</button>
                 </div>
@@ -63,7 +68,8 @@
             <div class="option-card" id="medium">
                 <div class="option-header medium-price">平均價位</div>
                 <div class="option-content">
-                    <img src="medium-price.png" alt="平均價位" class="option-image">
+                    <img src="{{ url_for('static', filename='image/medium-price.png') }}" alt="平均價位"
+                        class="option-image">
                     <p>酒店住宿 | 經典美食</p>
                     <button class="detail-button">查看詳細行程</button>
                 </div>
@@ -73,13 +79,14 @@
             <div class="option-card">
                 <div class="option-header high-price">高價位</div>
                 <div class="option-content">
-                    <img src="high-price.png" alt="高價位" class="option-image">
+                    <img src="{{ url_for('static', filename='image/high-price.png') }}" alt="高價位" class="option-image">
                     <p>五星級酒店 | 定制美食</p>
                     <button class="detail-button">查看詳細行程</button>
                 </div>
             </div>
         </div>
     </div>
-    <script src="scripts.js"></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
+
 </html>

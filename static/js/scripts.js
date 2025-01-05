@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchDays = document.getElementById("search-days");
 
     // 初始化範圍
-    let currentDays = parseInt(localStorage.getItem("currentDays")) || 3; // 儲存並讀取上次選擇的天數，如果沒有則默認為 3
+    let currentDays = parseInt(searchDays.textContent) || 3; // 儲存並讀取上次選擇的天數，如果沒有則默認為 3
     const minDays = 3;
     const maxDays = 7;
 
