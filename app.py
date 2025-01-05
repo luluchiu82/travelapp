@@ -8,9 +8,9 @@ from src.generate_visualization import generate_bar, generate_pie, generate_map,
 from src.data_clean import travel_data_clean, countryinfo_data_clean, data_merge
 
 # 加載欲分析的資料集  
-travel_df = pd.read_csv('/Users/lu/Desktop/G1_Dash_midterm/data/Travel_dataset.csv')
-country_info_df = pd.read_csv('/Users/lu/Desktop/G1_Dash_midterm/data/country_info.csv')
-attractions_df = pd.read_csv('/Users/lu/Desktop/G1_Dash_midterm/data/Attractions.csv')
+travel_df = pd.read_csv('./data/Travel_dataset.csv')
+country_info_df = pd.read_csv('./data/country_info.csv')
+attractions_df = pd.read_csv('./data/Attractions.csv')
 
 # 進行資料前處理
 travel_df = travel_data_clean(travel_df)
