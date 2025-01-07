@@ -173,7 +173,7 @@ def render_tab_content(tab):
                 multi=True,  # 啟用多選功能
                 style={
                     'backgroundColor': '#ffe5cc',  # 下拉式選單背景顏色
-                    'color': 'white'               # 下拉式選單文字顏色
+                    'color': 'black'               # 下拉式選單文字顏色
                 }
             ),
             html.Div(
@@ -249,11 +249,11 @@ def update_attractions_output(chosen_countries, tab):
         page_size=10,
         style_data={
             'backgroundColor': '#ffe5cc',
-            'color': 'white',
+            'color': 'black',
         },
         style_header={
             'backgroundColor': 'white',  # 修改表頭背景顏色
-            'color': '#ffe5cc',          # 修改表頭文字顏色
+            'color': '#black',          # 修改表頭文字顏色
             'fontWeight': 'bold',
         }
     )
