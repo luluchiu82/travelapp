@@ -65,7 +65,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <button type="button" onclick="addInput('places', '{{ item.day }}')">新增行程</button>
+                        <button type="button" class="newbutton" onclick="addInput('places', '{{ item.day }}')">新增行程</button>
                     </div>
 
                     <!-- 美食 -->
@@ -79,7 +79,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <button type="button" onclick="addInput('food', '{{ item.day }}')">新增美食</button>
+                        <button type="button" class="newbutton" onclick="addInput('food', '{{ item.day }}')">新增美食</button>
                     </div>
 
                     <!-- 住宿 -->
@@ -93,12 +93,12 @@
                             </div>
                             {% endif %}
                         </div>
-                        <button type="button" onclick="addInput('stay', '{{ item.day }}')">新增住宿</button>
+                        <button type="button" class="newbutton"  onclick="addInput('stay', '{{ item.day }}')">新增住宿</button>
                     </div>
                 </div>
             </section>
             {% endfor %}
-            <button type="submit">保存修改</button>
+            <button type="submit" class="saveEdit">保存</button>
         </form>
         <a href="/" class="return-link">返回</a>
     </main>
