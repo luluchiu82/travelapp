@@ -4,6 +4,7 @@ import dash
 from dash import Dash, html, dcc, Input, Output, dash_table, callback, no_update
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
+from flask import Flask, request, render_template
 
 # 導入其他模組中的函數
 from src.const import get_constants
@@ -260,5 +261,4 @@ def update_attractions_output(chosen_countries, tab):
 
 if __name__ == '__main__':
     app.run_server(debug=False)
-
     
