@@ -29,30 +29,32 @@
                 <div class="column">
                     <div class="column-title">行程</div>
                     {% for place in item.places.split(',') if place %}
-                    <div class="detail">{{ place }}</div>
+                    <a href="https://www.kkday.com/zh-cn/category/global/experiences">
+                        <div class="detail">{{ place }}</div>
+                    </a>
                     {% endfor %}
                 </div>
                 <div class="column">
                     <div class="column-title">美食</div>
                     {% for food in item.food.split(',') if food %}
-                    <div class="detail">{{ food }}</div>
+                    <a href="https://www.google.com.tw/maps">
+                        <div class="detail">{{ food }}</div>
+                    </a>
                     {% endfor %}
                 </div>
                 <div class="column">
                     <div class="column-title">住宿</div>
                     {% if item.stay and item.stay.strip() %}
-                    <div class="detail">{{ item.stay }}</div>
+                    <a href="https://tw.trip.com/?locale=zh-tw">
+                        <div class="detail">{{ item.stay }}</div>
+                    </a>
                     {% endif %}
                 </div>
             </div>
         </section>
         {% endfor %}
-        <div class="map">
-            <h3>顯示地圖</h3>
-            <iframe src="https://www.google.com/maps/embed" frameborder="0" class="map-iframe"></iframe>
-        </div>
     </main>
-    <button class="edit-button" onclick="window.location.href='/edit_package'">✏️</button>
+    <button class="edit-button" onclick="window.location.href='/edit_package'">編輯</button>
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>
