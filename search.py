@@ -105,7 +105,7 @@ def package_detail(trip_id):
         food_col = getattr(package, f'food_d{day}', None)
         accommodation_col = getattr(package, f'accommodation_d{day}', None)
 
-        # 如果是字串形式的 JSON，解析為 Python 列表
+        # 如果是字串形式的 JSON，轉為 Python 列表
         places_list = ast.literal_eval(attraction_col) if attraction_col else []
         food_list = ast.literal_eval(food_col) if food_col else []
         stay = ast.literal_eval(accommodation_col)[0] if accommodation_col else None
@@ -117,7 +117,7 @@ def package_detail(trip_id):
             "stay": stay
         })
 
-    # Tag欄位的資料處理
+    # Tag欄位資料處理
     tags = ast.literal_eval(package.tags) if package.tags else []
 
     return render_template('package.html', itinerary=itinerary_details, country=package.country, day=max_days, tags=tags, trip_id=trip_id)
@@ -126,7 +126,7 @@ def package_detail(trip_id):
 def edit_package(trip_id):
     package = Itinerary.query.filter_by(id=trip_id).first()
     if not package:
-        return "行程不存在", 404
+        return "旅遊包不存在", 404
 
     if request.method == 'POST':
         for day in range(1, package.day + 1):
@@ -155,12 +155,12 @@ def edit_package(trip_id):
 
 @app.route('/showdata')
 def showdata():
-    # 從資料庫中提取所有行程資料
+    # 從資料庫中抓出所有旅遊包資料
     all_data = Itinerary.query.all()
     result = []
 
     for item in all_data:
-        # 提取主要資料
+        # 主要資料
         data = {
             "id": item.id,
             "country": item.country,
@@ -169,7 +169,7 @@ def showdata():
             "tags": item.tags,
         }
         
-        # 提取每天的詳細資料
+        # 詳細資料
         daily_details = []
         for day in range(1, item.day + 1):
             daily_details.append({
@@ -182,10 +182,10 @@ def showdata():
         data["daily_details"] = daily_details
         result.append(data)
     
-    # 返回 JSON 格式以便查看
+    # 返回資料
     return {"data": result}
 
 
 if __name__ == '__main__':
-    initialize_database()  # 初始化資料庫
+    initialize_database()  # 初始化
     app.run(debug=True)
