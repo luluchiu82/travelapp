@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜尋結果</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 右上角的小搜尋欄 -->
+    <form action="/search" method="post">
+        <div class="search-container-small">
+            <input type="search" class="search-box" placeholder="繼續搜尋..." name="query">
+            <div class="buttons">
+                <button class="button">Search</button>
+            </div>
+        </div>
+    </form>
+
+
+
+    <div class="container">
+        <div class="topic">
+
+            <button class="arrow-button" id="left-arrow" {% if selected_day==3 %}disabled{% endif %}>
+                <img src="{{ url_for('static', filename='image/left-arrow.png') }}" alt="Left Arrow" class="arrow">
+            </button>
+
+            <div class="text-content">
+                <h1>
+                    <span class="search_place">{{ place }}</span>
+                    <span class="search_days">{{ selected_day }}日遊</span>
+                </h1>
+            </div>
+
+            <button class="arrow-button" id="right-arrow" {% if selected_day==7 %}disabled{% endif %}>
+                <img src="{{ url_for('static', filename='image/right-arrow.png') }}" alt="Right Arrow" class="arrow">
+            </button>
+
+
+        </div>
+
+
+
+        <div class="options">
+            {% for package in packages %}
+            <!-- Low Price -->
+            <div class="option-card" id="low">
+                <div class="option-header low-price">低價位</div>
+                <div class="option-content">
+                    <img src="{{ url_for('static', filename='image/low-price.png') }}" alt="低價位" class="option-image">
+                    <p>經濟型住宿 | 當地小吃</p>
+                    <!-- <button class="detail-button" data-trip-id="{{ package.low_id }}">查看詳細行程</button> -->
+                    <button class="detail-button" onclick="window.location.href='/package/{{ package.low_id }}'">查看詳細行程</button>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for package in packages %}
+            <!-- Medium Price -->
+            <div class="option-card" id="medium">
+                <div class="option-header medium-price">平均價位</div>
+                <div class="option-content">
+                    <img src="{{ url_for('static', filename='image/medium-price.png') }}" alt="平均價位" class="option-image">
+                    <p>酒店住宿 | 經典美食</p>
+                    <button class="detail-button" onclick="window.location.href='/package/{{ package.medium_id }}'">查看詳細行程</button>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for package in packages %}
+            <!-- High Price  -->
+            <div class="option-card" id="high">
+                <div class="option-header high-price">高價位</div>
+                <div class="option-content">
+                    <img src="{{ url_for('static', filename='image/high-price.png') }}" alt="高價位" class="option-image">
+                    <p>五星級酒店 | 訂製美食</p>
+                    <button class="detail-button" onclick="window.location.href='/package/{{ package.high_id }}'">查看詳細行程</button>
+                </div>
+            </div>
+            {% endfor %} 
+        </div>
+    </div>
+
+
+
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+
+</html>
