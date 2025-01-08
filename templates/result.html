@@ -29,63 +29,73 @@
     </form>
 
 
+
     <div class="container">
-        <!-- Header -->
         <div class="topic">
-            <!-- 左箭頭按鈕 -->
-            <button class="arrow-button" id="left-arrow" disabled>
+
+            <button class="arrow-button" id="left-arrow" {% if selected_day==3 %}disabled{% endif %}>
                 <img src="{{ url_for('static', filename='image/left-arrow.png') }}" alt="Left Arrow" class="arrow">
             </button>
 
-            <!-- 文字內容 -->
             <div class="text-content">
                 <h1>
                     <span class="search_place">{{ place }}</span>
-                    <span class="search_days" id="search-days">三日遊</span>
+                    <span class="search_days">{{ selected_day }}日遊</span>
                 </h1>
-                <p>大家在{{ place }}的機票花費：$15,000</p>
             </div>
 
-            <!-- 右箭頭按鈕 -->
-            <button class="arrow-button" id="right-arrow">
+            <button class="arrow-button" id="right-arrow" {% if selected_day==7 %}disabled{% endif %}>
                 <img src="{{ url_for('static', filename='image/right-arrow.png') }}" alt="Right Arrow" class="arrow">
             </button>
+
+
         </div>
 
-        <!-- Options -->
+
+
         <div class="options">
+            {% for package in packages %}
             <!-- Low Price -->
-            <div class="option-card">
+            <div class="option-card" id="low">
                 <div class="option-header low-price">低價位</div>
                 <div class="option-content">
                     <img src="{{ url_for('static', filename='image/low-price.png') }}" alt="低價位" class="option-image">
                     <p>經濟型住宿 | 當地小吃</p>
-                    <button class="detail-button">查看詳細行程</button>
+                    <!-- <button class="detail-button" data-trip-id="{{ package.low_id }}">查看詳細行程</button> -->
+                    <button class="detail-button" onclick="window.location.href='/package/{{ package.low_id }}'">查看詳細行程</button>
                 </div>
             </div>
+            {% endfor %}
 
+            {% for package in packages %}
             <!-- Medium Price -->
             <div class="option-card" id="medium">
                 <div class="option-header medium-price">平均價位</div>
                 <div class="option-content">
-                    <img src="{{ url_for('static', filename='image/medium-price.png') }}" alt="平均價位"
-                        class="option-image">
+                    <img src="{{ url_for('static', filename='image/medium-price.png') }}" alt="平均價位" class="option-image">
                     <p>酒店住宿 | 經典美食</p>
-                    <button class="detail-button">查看詳細行程</button>
+                    <button class="detail-button" onclick="window.location.href='/package/{{ package.medium_id }}'">查看詳細行程</button>
                 </div>
             </div>
+            {% endfor %}
 
-            <!-- High Price -->
-            <div class="option-card">
+            {% for package in packages %}
+            <!-- High Price  -->
+            <div class="option-card" id="high">
                 <div class="option-header high-price">高價位</div>
                 <div class="option-content">
                     <img src="{{ url_for('static', filename='image/high-price.png') }}" alt="高價位" class="option-image">
-                    <p>五星級酒店 | 定制美食</p>
-                    <button class="detail-button">查看詳細行程</button>
+                    <p>五星級酒店 | 訂製美食</p>
+                    <button class="detail-button" onclick="window.location.href='/package/{{ package.high_id }}'">查看詳細行程</button>
                 </div>
             </div>
+            {% endfor %} 
         </div>
     </div>
+
+
+
+
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 

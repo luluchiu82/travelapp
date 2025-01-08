@@ -145,6 +145,7 @@ body {
     border-radius: 5px;
     margin: 5px 0;
     font-size: 14px;
+    text-decoration: none; /* 移除底線 */
 }
 
 /* Options Section */
@@ -231,21 +232,53 @@ body {
     font-size: 14px;
 }
 
+.delete-btn{
+    background-color: #FFD1A4;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
 .detail-button:hover {
-    background-color: #ff6600;
+    background-color: #ff944d;
 }
 
-/* Map Section */
-.map {
-    margin-top: 20px;
-    text-align: center;
+.newbutton{
+    background-color: #ff944d;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-.map-iframe {
-    width: 100%;
-    height: 300px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
+/* 可編輯輸入框樣式 */
+input.editable {
+    flex-grow: 1; /* 讓輸入框填滿剩餘空間 */
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 2px solid #FFD1A4; /* 與橘色框一致的顏色 */
+    border-radius: 5px;
+    box-sizing: border-box;
+    outline: none;
+    margin-right: 8px; /* 與刪除按鈕保持距離 */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button.delete-btn:hover {
+    background-color: #ff944d; /* hover 狀態 */
+}
+
+/* 新增與刪除按鈕的容器微調 */
+.input-wrapper {
+    margin-bottom: 8px; /* 增加上下距離 */
+}
+
+button.add-btn {
+    margin-top: 10px; /* 新增按鈕與內容的距離 */
 }
 
 /* Edit Button */
@@ -325,3 +358,36 @@ body {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.saveEdit{
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    background-color: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+.return-link{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    text-decoration: none; /* 移除底線 */
+}
+
+a{
+    text-decoration: none; /* 移除底線 */
+}
+
+
+

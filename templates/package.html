@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>旅遊包詳細行程</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
     <header class="header">
         <div class="header-whole">
             <div class="header-left">
-                <h1>日本 <span id="search-days">{{ itinerary|length }}日遊</span></h1>
+                <h1>{{ country }} <span id="search-days">{{ itinerary|length }}日遊</span></h1>
                 <div class="tags">
-                    <span class="tag"># 經濟型住宿</span>
-                    <span class="tag"># 當地小吃</span>
+                    {% for tag in tags %}
+                    <!-- <span class="tag"># 經濟型住宿</span>
+                    <span class="tag"># 當地小吃</span> -->
+                    <span class="tag"># {{ tag }}</span>
+                    {% endfor %}
                 </div>
             </div>
             <div class="logo navbar">
@@ -21,6 +26,8 @@
             </div>
         </div>
     </header>
+
+
     <main class="content">
         {% for item in itinerary %}
         <section class="day">
@@ -28,31 +35,50 @@
             <div class="day-details">
                 <div class="column">
                     <div class="column-title">行程</div>
-                    {% for place in item.places.split(',') if place %}
-                    <div class="detail">{{ place }}</div>
+                    {% for place in item.places %}
+                    <div class="detail">
+                        <a href="https://www.kkday.com/zh-cn/category/global/experiences" style="color: #ff944d;" >{{ place }}</a>
+                    </div>
                     {% endfor %}
                 </div>
                 <div class="column">
                     <div class="column-title">美食</div>
-                    {% for food in item.food.split(',') if food %}
-                    <div class="detail">{{ food }}</div>
+                    {% for food in item.food %}
+                    <div class="detail">
+                        <a href="https://www.google.com.tw/maps" style="color: #ff944d;">{{ food }}</a>
+                    </div>
                     {% endfor %}
                 </div>
                 <div class="column">
                     <div class="column-title">住宿</div>
-                    {% if item.stay and item.stay.strip() %}
-                    <div class="detail">{{ item.stay }}</div>
+                    {% if item.stay %}
+                    <div class="detail">
+                        <a href="https://tw.trip.com/?locale=zh-tw" style="color: #ff944d;">{{ item.stay }}</a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </section>
         {% endfor %}
-        <div class="map">
-            <h3>顯示地圖</h3>
-            <iframe src="https://www.google.com/maps/embed" frameborder="0" class="map-iframe"></iframe>
-        </div>
     </main>
-    <button class="edit-button" onclick="window.location.href='/edit_package'">✏️</button>
+
+
+    <button class="edit-button" onclick="window.location.href='/edit_package/{{ trip_id }}'">編輯</button>
+
+
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script>
+        // 更新狀態文字
+        function updateStatus(checkbox) {
+            const label = checkbox.nextElementSibling; // 找到對應的狀態文字
+            if (checkbox.checked) {
+                label.textContent = "已完成";
+            } else {
+                label.textContent = "未預約";
+            }
+        }
+    </script>
+    
 </body>
+
 </html>
