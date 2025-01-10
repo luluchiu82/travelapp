@@ -4,10 +4,7 @@ import dash
 from dash import Dash, html, dcc, Input, Output, dash_table, callback, no_update
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
-<<<<<<< HEAD
 from flask import Flask, request, render_template
-=======
->>>>>>> 46ede1d7599a8933093e5e3cdd1fc28d281cb0fa
 
 # 導入其他模組中的函數
 from src.const import get_constants
@@ -177,11 +174,7 @@ def render_tab_content(tab):
                 multi=True,  # 啟用多選功能
                 style={
                     'backgroundColor': '#ffe5cc',  # 下拉式選單背景顏色
-<<<<<<< HEAD
                     'color': 'black'               # 下拉式選單文字顏色
-=======
-                    'color': 'white'               # 下拉式選單文字顏色
->>>>>>> 46ede1d7599a8933093e5e3cdd1fc28d281cb0fa
                 }
             ),
             html.Div(
@@ -257,27 +250,15 @@ def update_attractions_output(chosen_countries, tab):
         page_size=10,
         style_data={
             'backgroundColor': '#ffe5cc',
-<<<<<<< HEAD
             'color': 'black',
         },
         style_header={
             'backgroundColor': 'white',  # 修改表頭背景顏色
             'color': '#black',          # 修改表頭文字顏色
-=======
-            'color': 'white',
-        },
-        style_header={
-            'backgroundColor': 'white',  # 修改表頭背景顏色
-            'color': '#ffe5cc',          # 修改表頭文字顏色
->>>>>>> 46ede1d7599a8933093e5e3cdd1fc28d281cb0fa
             'fontWeight': 'bold',
         }
     )
 
 if __name__ == '__main__':
     app.run_server(debug=False)
-<<<<<<< HEAD
-=======
-
->>>>>>> 46ede1d7599a8933093e5e3cdd1fc28d281cb0fa
     
