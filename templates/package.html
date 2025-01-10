@@ -50,6 +50,7 @@
                     </div>
                     {% endfor %}
                 </div>
+                
                 <div class="column">
                     <div class="column-title">住宿</div>
                     {% if item.stay %}
@@ -68,6 +69,17 @@
 
 
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script>
+        // 更新狀態文字
+        function updateStatus(checkbox) {
+            const label = checkbox.nextElementSibling; // 找到對應的狀態文字
+            if (checkbox.checked) {
+                label.textContent = "已完成";
+            } else {
+                label.textContent = "未預約";
+            }
+        }
+    </script>
     
 </body>
 

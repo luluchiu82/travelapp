@@ -58,7 +58,7 @@
                     <div class="column">
                         <div class="column-title">行程</div>
                         <div id="places-{{ item.day }}">
-                            {% for place in item.places.split(',') if place %}
+                            {% for place in item.places if place %}
                             <div class="input-wrapper" id="place-{{ loop.index }}-{{ item.day }}">
                                 <input type="text" name="places-{{ item.day }}" value="{{ place }}" class="editable">
                                 <button type="button" class="delete-btn" onclick="deleteInput('place-{{ loop.index }}-{{ item.day }}')">🗑️</button>
@@ -72,7 +72,7 @@
                     <div class="column">
                         <div class="column-title">美食</div>
                         <div id="food-{{ item.day }}">
-                            {% for food in item.food.split(',') if food %}
+                            {% for food in item.food if food %}
                             <div class="input-wrapper" id="food-{{ loop.index }}-{{ item.day }}">
                                 <input type="text" name="food-{{ item.day }}" value="{{ food }}" class="editable">
                                 <button type="button" class="delete-btn" onclick="deleteInput('food-{{ loop.index }}-{{ item.day }}')">🗑️</button>
