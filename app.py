@@ -1,10 +1,14 @@
+import plotly.express as px
+import pandas as pd
+import dash
 from dash import Dash, html, dcc, Input, Output, dash_table, callback, no_update
 import dash_bootstrap_components as dbc
-import pandas as pd
+from dash.exceptions import PreventUpdate
+from flask import Flask, request, render_template
 
 # 導入其他模組中的函數
 from src.const import get_constants
-from src.generate_visualization import generate_bar, generate_pie, generate_map, generate_box
+from src.generate_visualization import generate_accommodation_bar, generate_transportation_bar, generate_total_cost_bar
 from src.data_clean import travel_data_clean, countryinfo_data_clean, data_merge
 
 # 加載欲分析的資料集  
@@ -45,7 +49,7 @@ def generate_stats_card (title, value, image_path):
                 html.P(value, className="card-value", style={'margin': '0px','fontSize': '22px','fontWeight': 'bold'}), # 數據外觀設定
                 html.H4(title, className="card-title", style={'margin': '0px','fontSize': '18px','fontWeight': 'bold'}) # 標題外觀設定
             ], style={'textAlign': 'center'}),
-        ], style={'paddingBlock':'10px',"backgroundColor":'#deb522','border':'none','borderRadius':'10px'}) # 卡片外觀設定
+        ], style={'paddingBlock':'10px',"backgroundColor":'#ffe5cc','border':'none','borderRadius':'10px'}) # 卡片外觀設定
     )
 
 # 外觀設定
@@ -58,7 +62,7 @@ tab_style = {
         'alignItems':'center',
         'justifyContent':'center',
         'fontWeight': 'bold',
-        'backgroundColor': '#deb522',
+        'backgroundColor': '#ffe5cc',
         'border':'none'
     },
     'active':{
@@ -71,7 +75,7 @@ tab_style = {
         'fontWeight': 'bold',
         'border':'none',
         'textDecoration': 'underline',
-        'backgroundColor': '#deb522'
+        'backgroundColor': '#ffe5cc'
     }
 }
 
@@ -82,39 +86,28 @@ app.layout = html.Div([
     dbc.Container([
         # 頂部的切換頁面
         dbc.Row([
-            dbc.Col(html.Img(src="./assets/logo.png", height=100), width=5, style={'marginTop': '15px'}),
-            # 可參考簡報 Callback function ( tabs.py )
+            dbc.Col(html.Img(src="./static/image/logo.png", height=100), width=5, style={'marginTop': '15px'}),
             dbc.Col(
                 dcc.Tabs(id='graph-tabs', value='overview', children=[
-                    dcc.Tab(label='Overview', value='overview',style=tab_style['idle'],selected_style=tab_style['active']),
-                    dcc.Tab(label='Attractions', value='attractions',style=tab_style['idle'],selected_style=tab_style['active']),
-                    # 若有其他頁面可以自行增加
-                    # dcc.Tab(label='Other Page', value='other_page',style=tab_style['idle'],selected_style=tab_style['active']),
-                ], style={'height':'50px'})
-            ,width=7, style={'alignSelf': 'center'}),
+                    dcc.Tab(label='Overview', value='overview', style=tab_style['idle'], selected_style=tab_style['active']),
+                    dcc.Tab(label='Attractions', value='attractions', style=tab_style['idle'], selected_style=tab_style['active']),
+                ], style={'height': '50px'})
+            , width=7, style={'alignSelf': 'center'}),
         ]),
-        # 統計數據
-        dbc.Row([
-            dbc.Col(generate_stats_card("Country", num_of_country, "./assets/earth.svg"), width=3),
-            dbc.Col(generate_stats_card("Traveler", num_of_traveler, "./assets/user.svg"), width=3),
-            dbc.Col(generate_stats_card("Nationality", num_of_nationality, "./assets/earth.svg"), width=3),
-            dbc.Col(generate_stats_card("Average Days", avg_days, "./assets/calendar.svg"), width=3),
-        ],style={'marginBlock': '10px'}),
         
-        # 中間切換頁面
+        # 統計數據卡片
         dbc.Row([
-            dcc.Tabs(id='tabs', value='travel', children=[
-                dcc.Tab(label='Travel Data', value='travel',style={'border':'1px line white','backgroundColor':'black','color': '#deb522','fontWeight': 'bold'},selected_style={'border':'1px solid white','backgroundColor':'black','color': '#deb522','fontWeight': 'bold','textDecoration': 'underline'}),
-                # 若有其他頁面可以自行增加
-                # dcc.Tab(label='Other', value='other',style={'border':'1px solid white','backgroundColor':'black','color': '#deb522','fontWeight': 'bold'},selected_style={'border':'1px solid white','backgroundColor':'black','color': '#deb522','fontWeight': 'bold','textDecoration': 'underline'}),
-            ], style={'padding': '0px'})
-        ]),
+            dbc.Col(generate_stats_card("Country", num_of_country, "./static/image/earth.svg"), width=3),
+            dbc.Col(generate_stats_card("Traveler", num_of_traveler, "./static/image/user.svg"), width=3),
+            dbc.Col(generate_stats_card("Nationality", num_of_nationality, "./static/image/earth.svg"), width=3),
+            dbc.Col(generate_stats_card("Average Days", avg_days, "./static/image/calendar.svg"), width=3),
+        ], style={'marginBlock': '10px'}),
 
         # 用於顯示不同頁面的內容
         html.Div(id='graph-content')
 
-    ], style={'padding': '0px'})
-], style={'backgroundColor': 'black', 'minHeight': '100vh'})
+    ], style={'padding': '0px', 'width': '60%', 'margin': '0 auto'})
+], style={'backgroundColor': 'white', 'minHeight': '100vh'})
 
 
 # 根據選擇的標籤頁更新顯示的內容
@@ -122,61 +115,54 @@ app.layout = html.Div([
     Output('graph-content', 'children'), # callback function output: id為'graph-content'的 children（第113行程式碼）
     [Input('graph-tabs', 'value')] # callback function input: id為'graph-tabs'的 value值（第87行程式碼）
 )
-def render_tab_content(tab): # 針對上述的input值要做的處理，tab = Input('graph-tabs', 'value')
+def render_tab_content(tab):
+    asian_countries = ['Thailand', 'Indonesia', 'Japan', 'Cambodia', 'South Korea']
     if tab == 'overview':
-        # 返回 'Overview' 頁面的佈局
         return html.Div([
-            # 第一排下拉選單 - 長條圖(Col1) & 圓餅圖(Col2)
-            # 可參考簡報 Callback function ( dropdown.py )
-            # 可參考簡報 資料視覺化( visualizing.py )
             dbc.Row([
                 dbc.Col([
-                    html.H3("各國不同年齡層的平均花費", style={'color': '#deb522', 'margin-top': '5px'}),
+                    html.H3("各國平均每日住宿花費", style={'color': '#ff944d', 'margin-top': '5px'}),
                     dcc.Dropdown(
-                        id='dropdown-bar-1',
+                        id='dropdown-bar-accommodation',
                         options=[
-                            {'label': i, 'value': i} for i in pd.concat([df_merged['Destination']]).unique()
+                            {'label': i, 'value': i} for i in asian_countries
                         ],
                         placeholder='Select a country',
-                        style={'width': '90%', 'margin-top': '10px', 'margin-bottom': '10px'}
-                    )
-                ]),
-                dbc.Col([
-                    html.H3("各國遊客的住宿種類/交通種類/年齡分佈", style={'color': '#deb522', 'margin-top': '5px'}),
-                    dcc.Dropdown(
-                        id='dropdown-pie-1',
-                        options = [
-                            {'label': i, 'value': i} for i in pd.concat([df_merged['Destination']]).unique()
-                        ],
-                        placeholder='Select a continent or country',
-                        style={'width': '50%', 'margin-top': '5px', 'margin-bottom': '5px', 'display': 'inline-block'}
+                        style={'width': '60%', 'margin-top': '10px', 'margin-bottom': '10px', 'backgroundColor': 'white', 'color': '#ff944d'}
                     ),
-                    dcc.Dropdown(
-                        id='dropdown-pie-2',
-                        options = [
-                            {'label': i, 'value': i} for i in ['Age group', 'Accommodation type', 'Transportation type']
-                        ],
-                        placeholder='Select a value',
-                        style={'width': '50%', 'margin-top': '5px', 'margin-bottom': '5px', 'display': 'inline-block'}
-                    )
-                ]),
+                    dcc.Graph(id='bar-chart-accommodation')
+                ])
             ]),
-            # 第一排圖表顯示區 - 長條圖(Col1：tabs-content-1) & 圓餅圖(Col2：tabs-content-2)
             dbc.Row([
                 dbc.Col([
-                    dcc.Loading([
-                        html.Div(id='tabs-content-1'),
-                    ],
-                    type='default',color='#deb522'),
-                ]),
-                dbc.Col([
-                    dcc.Loading([
-                        html.Div(id='tabs-content-2'),
-                    ],
-                    type='default',color='#deb522'),
-                ]),
+                    html.H3("各國平均每日交通花費", style={'color': '#ff944d', 'margin-top': '5px'}),
+                    dcc.Dropdown(
+                        id='dropdown-bar-transportation',
+                        options=[
+                            {'label': i, 'value': i} for i in asian_countries
+                        ],
+                        placeholder='Select a country',
+                        style={'width': '60%', 'margin-top': '10px', 'margin-bottom': '10px', 'backgroundColor': 'white', 'color': '#ff944d'}
+                    ),
+                    dcc.Graph(id='bar-chart-transportation')
+                ])
             ]),
+            dbc.Row([
+                dbc.Col([
+                    html.H3("各國平均每日總成本", style={'color': '#ff944d', 'margin-top': '5px'}),
+                    dcc.Dropdown(
+                        id='dropdown-bar-total',
+                        options=[
+                            {'label': i, 'value': i} for i in asian_countries
+                        ],
+                        placeholder='Select a country',
+                        style={'width': '60%', 'margin-top': '10px', 'margin-bottom': '10px', 'backgroundColor': 'white', 'color': '#ff944d'}
+                    ),
+                    dcc.Graph(id='bar-chart-total')
+                ])
+            ])
         ])
+
     # 可參考簡報 Callback function (multiValueDropdown.py )
     elif tab == 'attractions':
         # 返回 'Attractions' 頁面的佈局
@@ -187,7 +173,7 @@ def render_tab_content(tab): # 針對上述的input值要做的處理，tab = In
                 id='attractions-dropdown',
                 multi=True,  # 啟用多選功能
                 style={
-                    'backgroundColor': '#deb522',  # 下拉式選單背景顏色
+                    'backgroundColor': '#ffe5cc',  # 下拉式選單背景顏色
                     'color': 'black'               # 下拉式選單文字顏色
                 }
             ),
@@ -197,104 +183,53 @@ def render_tab_content(tab): # 針對上述的input值要做的處理，tab = In
             )
         ])
     else:
-        return html.Div("選擇的標籤頁不存在。", style={'color': 'white'})
+        return html.Div("選擇的標籤頁不存在。", style={'color': 'black'})
 
 # 可參考簡報Callback function ( dropdown.py )
 # 長條圖回調
+df = pd.DataFrame(travel_df)
+
+#app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+#app.layout = html.Div([
+#    dcc.Tabs(id='graph-tabs', value='overview', children=[
+#        dcc.Tab(label='Overview', value='overview'),
+#    ]),
+#    html.Div(id='tabs-content')
+#])
+
 @app.callback(
-    Output('tabs-content-1', 'children'), # callback function output: id為'tabs-content-1'的 children（第165行程式碼）
-    [Input('dropdown-bar-1', 'value'),  # callback function input 1: id為'dropdown-bar-1'的 value值（第133行程式碼）
-     Input('graph-tabs', 'value')]  # callback function input 2: id為'graph-tabs'的 value值（第87行程式碼）
+    Output('tabs-content', 'children'),
+    Input('graph-tabs', 'value')
 )
-# 更新長條圖
-def update_bar_chart(dropdown_value, tab): # 針對上述的input值要做的處理，dropdown_value = Input('dropdown-bar-1', 'value')，tab = Input('graph-tabs', 'value')
-    
-    # 如果當前頁面不是選擇'overview'，則不更新圖表
-    if tab != 'overview':
-        return no_update
-    
-    # 選取要用的資料(第26行程式碼的function)
-    df = load_data('travel')
+def update_tab(tab):
+    return render_tab_content(tab)
 
-    # 生成長條圖
-    fig1 = generate_bar(df, dropdown_value)
-
-    # 回傳包含長條圖的html.Div
-    return html.Div([
-        dcc.Graph(id='graph1', figure=fig1),
-    ], style={'width': '90%', 'display': 'inline-block'})
-
-# 圓餅圖回調
 @app.callback(
-    Output('tabs-content-2', 'children'), # callback function output: id為'tabs-content-2'的 children（第172行程式碼）
-    [Input('dropdown-pie-1', 'value'), # callback function input 1: id為'dropdown-pie-1'的 value值（第145行程式碼）
-     Input('dropdown-pie-2', 'value'), # callback function input 2: id為'dropdown-pie-2'的 value值（第153行程式碼）
-     Input('graph-tabs', 'value')] # callback function input 2: id為'graph-tabs'的 value值（第87行程式碼）
+    Output('bar-chart-accommodation', 'figure'),
+    Input('dropdown-bar-accommodation', 'value')
 )
-# 更新長條圖
-def update_pie_chart(dropdown_value_1, dropdown_value_2, tab): # 針對上述的input值要做的處理，dropdown_value_1 = Input('dropdown-pie-1', 'value')，dropdown_value_2 = Input('dropdown-pie-2', 'value')，tab = Input('graph-tabs', 'value')
-    # 如果當前頁面不是選擇'overview'，則不更新圖表
-    if tab != 'overview':
-        return no_update
+def update_accommodation_bar(selected_country):
+    if not selected_country:
+        raise PreventUpdate
+    return generate_accommodation_bar(df, selected_country)
 
-    # 選取要用的資料(第26行程式碼的function)
-    df = load_data('travel')
-
-    # 生成圓餅圖
-    fig2 = generate_pie(df, dropdown_value_1, dropdown_value_2)
-    
-    # 回傳包含圓餅圖的html.Div
-    return html.Div([
-        dcc.Graph(id='graph2', figure=fig2),
-    ], style={'width': '90%', 'display': 'inline-block'})
-
-# 地圖回調
 @app.callback(
-    Output('tabs-content-3', 'children'), # callback function output: id為'tabs-content-3'的 children（第219行程式碼）
-    [Input('dropdown-map-1', 'value'), # callback function input 1: id為'dropdown-map-1'的 value值（第182行程式碼）
-     Input('dropdown-map-2', 'value'), # callback function input 2: id為'dropdown-map-2'的 value值（第189行程式碼）
-     Input('graph-tabs', 'value')] # callback function input 3: id為'graph-tabs'的 value值（第87行程式碼）
+    Output('bar-chart-transportation', 'figure'),
+    Input('dropdown-bar-transportation', 'value')
 )
-# 更新地圖
-def update_map(dropdown_value_1, dropdown_value_2, tab): # 針對上述的input值要做的處理，dropdown_value_1 = Input('dropdown-map-1', 'value')，dropdown_value_2 = Input('dropdown-map-2', 'value')，tab = Input('graph-tabs', 'value')
-    # 如果當前頁面不是選擇'overview'，則不更新圖表
-    if tab != 'overview':
-        return no_update
+def update_transportation_bar(selected_country):
+    if not selected_country:
+        raise PreventUpdate
+    return generate_transportation_bar(df, selected_country)
 
-    # 選取要用的資料(第26行程式碼的function)
-    df = load_data('travel')
-
-    # 生成地圖
-    fig3 = generate_map(df, dropdown_value_1, dropdown_value_2)
-    
-    # 回傳包含地圖的html.Div
-    return html.Div([
-        dcc.Graph(id='graph3', figure=fig3),
-    ], style={'width': '90%', 'display': 'inline-block'})
-
-# 箱型圖回調
 @app.callback(
-    Output('tabs-content-4', 'children'), # callback function output: id為'tabs-content-4'的 children（第227行程式碼）
-    [Input('dropdown-box-1', 'value'), # callback function input 1: id為'dropdown-box-1'的 value值（第202行程式碼）
-     Input('dropdown-box-2', 'value'), # callback function input 2: id為'dropdown-box-2'的 value值（第208行程式碼）
-     Input('graph-tabs', 'value')] # callback function input 3: id為'graph-tabs'的 value值（第87行程式碼）
+    Output('bar-chart-total', 'figure'),
+    Input('dropdown-bar-total', 'value')
 )
-# 更新箱型圖
-def update_box_chart(dropdown_value_1, dropdown_value_2, tab): # 針對上述的input值要做的處理，dropdown_value_1 = Input('dropdown-box-1', 'value')，dropdown_value_2 = Input('dropdown-box-2', 'value')，tab = Input('graph-tabs', 'value')
-    # 如果當前頁面不是選擇'overview'，則不更新圖表
-    if tab != 'overview':
-        return no_update
-    
-    # 選取要用的資料(第26行程式碼的function)
-    df = load_data('travel')
-
-    # 生成箱型圖
-    fig4 = generate_box(df, dropdown_value_1, dropdown_value_2)
-    
-    # 回傳包含箱型圖的html.Div
-    return html.Div([
-        dcc.Graph(id='graph4', figure=fig4),
-    ], style={'width': '90%', 'display': 'inline-block'})
+def update_total_cost_bar(selected_country):
+    if not selected_country:
+        raise PreventUpdate
+    return generate_total_cost_bar(df, selected_country)
 
 # 景點下拉式選單回調
 @app.callback(
@@ -307,22 +242,23 @@ def update_attractions_output(chosen_countries, tab):
         return no_update
     # 檢查是否有選擇國家
     if not chosen_countries:
-        return html.Div("請選擇至少一個國家。", style={'color': 'white'})
+        return html.Div("請選擇至少一個國家。", style={'color': 'black'})
     # 過濾出選擇的國家
     chosen_df = attractions_df[attractions_df['country'].isin(chosen_countries)]
     return dash_table.DataTable(
         data=chosen_df.to_dict('records'),
         page_size=10,
         style_data={
-            'backgroundColor': '#deb522',
+            'backgroundColor': '#ffe5cc',
             'color': 'black',
         },
         style_header={
-            'backgroundColor': 'black',  # 修改表頭背景顏色
-            'color': '#deb522',          # 修改表頭文字顏色
+            'backgroundColor': 'white',  # 修改表頭背景顏色
+            'color': '#black',          # 修改表頭文字顏色
             'fontWeight': 'bold',
         }
     )
 
 if __name__ == '__main__':
     app.run_server(debug=False)
+    
