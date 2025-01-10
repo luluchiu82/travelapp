@@ -60,38 +60,6 @@ def initialize_database():
 
         db.session.commit()
 
-# 資料清理函式
-def clean_database():
-    with app.app_context():
-        all_data = Itinerary.query.all()
-
-        for item in all_data:
-            # 清理每日行程資料
-            for day in range(1, item.day + 1):
-                # 處理行程 (attraction_dX)
-                attr_col = f'attraction_d{day}'
-                attr_raw = getattr(item, attr_col, None)
-                if attr_raw and attr_raw.startswith('['):
-                    cleaned_attr = ", ".join(ast.literal_eval(attr_raw))
-                    setattr(item, attr_col, cleaned_attr)
-
-                # 處理美食 (food_dX)
-                food_col = f'food_d{day}'
-                food_raw = getattr(item, food_col, None)
-                if food_raw and food_raw.startswith('['):
-                    cleaned_food = ", ".join(ast.literal_eval(food_raw))
-                    setattr(item, food_col, cleaned_food)
-
-                # 處理住宿 (accommodation_dX)
-                stay_col = f'accommodation_d{day}'
-                stay_raw = getattr(item, stay_col, None)
-                if stay_raw and stay_raw.startswith('['):
-                    cleaned_stay = ", ".join(ast.literal_eval(stay_raw))
-                    setattr(item, stay_col, cleaned_stay)
-
-        # 提交變更
-        db.session.commit()
-        print("資料庫清理完成！")
 
 @app.route('/')
 def index():
@@ -121,9 +89,10 @@ def search():
 
     return render_template('result.html', place=query, packages=packages, selected_day=selected_day)
 
+import ast  # 用於轉字串為 Python 結構
+
 @app.route('/package/<int:trip_id>')
 def package_detail(trip_id):
-    # 根據 Trip_ID 查詢資料
     package = Itinerary.query.filter_by(id=trip_id).first()
     if not package:
         return render_template('test2.html', itinerary=[], country="", day=0, tags=[])
@@ -131,16 +100,21 @@ def package_detail(trip_id):
     itinerary_details = []
     max_days = package.day  # 幾天的旅遊包
     for day in range(1, max_days + 1):
-        # 旅遊包的內容
+        # 獲取每一天的旅遊包
         attraction_col = getattr(package, f'attraction_d{day}', None)
         food_col = getattr(package, f'food_d{day}', None)
         accommodation_col = getattr(package, f'accommodation_d{day}', None)
 
+        # 如果是字串形式的 JSON，轉為 Python 列表
+        places_list = ast.literal_eval(attraction_col) if attraction_col else []
+        food_list = ast.literal_eval(food_col) if food_col else []
+        stay = ast.literal_eval(accommodation_col)[0] if accommodation_col else None
+
         itinerary_details.append({
             "day": day,
-            "places": attraction_col,
-            "food": food_col,
-            "stay": accommodation_col
+            "places": places_list,
+            "food": food_list,
+            "stay": stay
         })
 
     # Tag欄位的資料處理
@@ -155,34 +129,48 @@ def edit_package(trip_id):
         return "行程不存在", 404
 
     if request.method == 'POST':
-        # 保存使用者修改過的資料
         for day in range(1, package.day + 1):
-            setattr(package, f'attraction_d{day}', request.form.get(f'places-{day}', ''))
-            setattr(package, f'food_d{day}', request.form.get(f'food-{day}', ''))
-            setattr(package, f'accommodation_d{day}', request.form.get(f'stay-{day}', ''))
+            # 處理行程
+            new_places = request.form.getlist(f'places-{day}')  # 獲取行程輸入框的數據
+            formatted_places = [p.strip() for p in new_places if p.strip()]  # 去掉空值並去掉多餘空格
+            setattr(package, f'attraction_d{day}', str(formatted_places))  # 儲存為 JSON 字串格式
+
+            # 處理美食
+            new_foods = request.form.getlist(f'food-{day}')  # 獲取美食輸入框的數據
+            formatted_foods = [f.strip() for f in new_foods if f.strip()]  # 去掉空值並去掉多餘空格
+            setattr(package, f'food_d{day}', str(formatted_foods))  # 儲存為 JSON 字串格式
+
+            # 處理住宿
+            new_stay = request.form.get(f'stay-{day}', '').strip()  # 獲取住宿輸入框的數據
+            if new_stay:  # 如果有輸入住宿
+                setattr(package, f'accommodation_d{day}', str([new_stay]))  # 包裝成 JSON 字串格式的列表
+            else:
+                setattr(package, f'accommodation_d{day}', None)  # 如果沒輸入，設為 None
+
         db.session.commit()
         return redirect(f'/package/{trip_id}')
 
-    # 顯示在頁面上的資料
+    # 將數據還原為前端需要的格式
     itinerary_details = []
     for day in range(1, package.day + 1):
         itinerary_details.append({
             "day": day,
-            "places": getattr(package, f'attraction_d{day}', ''),
-            "food": getattr(package, f'food_d{day}', ''),
-            "stay": getattr(package, f'accommodation_d{day}', '')
+            "places": ast.literal_eval(getattr(package, f'attraction_d{day}', '') or '[]'),
+            "food": ast.literal_eval(getattr(package, f'food_d{day}', '') or '[]'),
+            "stay": ast.literal_eval(getattr(package, f'accommodation_d{day}', '') or '[]')[0] if getattr(package, f'accommodation_d{day}', '') else ""
         })
 
     return render_template('edit_package.html', itinerary=itinerary_details, trip_id=trip_id)
 
+# 用來檢查資料型態
 @app.route('/showdata')
 def showdata():
-    # 從資料庫中提取所有行程資料
+    # 從資料庫中抓取所有行程資料
     all_data = Itinerary.query.all()
     result = []
 
     for item in all_data:
-        # 提取主要資料
+        # 主要資料
         data = {
             "id": item.id,
             "country": item.country,
@@ -191,7 +179,7 @@ def showdata():
             "tags": item.tags,
         }
         
-        # 提取每天的詳細資料
+        # 詳細資料
         daily_details = []
         for day in range(1, item.day + 1):
             daily_details.append({
@@ -204,11 +192,10 @@ def showdata():
         data["daily_details"] = daily_details
         result.append(data)
     
-    # 返回 JSON 格式以便查看
+    # 返回資料
     return {"data": result}
 
 
 if __name__ == '__main__':
-    initialize_database()  # 初始化資料庫
-    clean_database()  # 清理資料庫
+    initialize_database()  # 初始化
     app.run(debug=True)
